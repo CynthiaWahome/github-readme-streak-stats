@@ -37,12 +37,16 @@ try {
     $startingYear = isset($_REQUEST["starting_year"]) ? intval($_REQUEST["starting_year"]) : null;
     $contributionGraphs = getContributionGraphs($user, $startingYear);
     $contributions = getContributionDates($contributionGraphs);
+    
+    // Get grace period from request (default: 3, max: 7)
+    $graceDays = isset($_REQUEST["grace"]) ? max(0, min(7, intval($_REQUEST["grace"]))) : 3;
+
     if (isset($_GET["mode"]) && $_GET["mode"] === "weekly") {
         $stats = getWeeklyContributionStats($contributions);
     } else {
         // split and normalize excluded days
         $excludeDays = normalizeDays(explode(",", $_GET["exclude_days"] ?? ""));
-        $stats = getContributionStats($contributions, $excludeDays);
+        $stats = getContributionStats($contributions, $excludeDays, $graceDays);
     }
     renderOutput($stats);
 } catch (InvalidArgumentException | AssertionError $error) {

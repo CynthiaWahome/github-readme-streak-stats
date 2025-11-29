@@ -94,6 +94,9 @@ function translateDays(array $days, string $locale): array
  */
 function getExcludingDaysText($excludedDays, $localeTranslations, $localeCode)
 {
+    if (empty($excludedDays)) {
+        return "";
+    }
     $separator = $localeTranslations["comma_separator"] ?? ", ";
     $daysCommaSeparated = implode($separator, translateDays($excludedDays, $localeCode));
     return str_replace("{days}", $daysCommaSeparated, $localeTranslations["Excluding {days}"]);
@@ -481,10 +484,11 @@ function generateCard(array $stats, array $params = null): string
 
     // if days are excluded, add a note to the corner
     $excludedDays = "";
-    if (!empty($stats["excludedDays"])) {
+    if (!empty($stats["excludedDays"]) && count($stats["excludedDays"]) > 0) {
         $offset = $direction === "rtl" ? $cardWidth - 5 : 5;
         $excludingDaysText = getExcludingDaysText($stats["excludedDays"], $localeTranslations, $localeCode);
-        $excludedDays = "<g style='isolation: isolate'>
+        if (!empty($excludingDaysText)) {
+            $excludedDays = "<g style='isolation: isolate'>
                 <!-- Excluded Days -->
                 <g transform='translate({$offset},187)'>
                     <text stroke-width='0' text-anchor='right' fill='{$theme["excludeDaysLabel"]}' stroke='none' font-family='\"Segoe UI\", Ubuntu, sans-serif' font-weight='400' font-size='10px' font-style='normal' style='opacity: 0; animation: fadein 0.5s linear forwards 0.9s'>
@@ -492,6 +496,7 @@ function generateCard(array $stats, array $params = null): string
                     </text>
                 </g>
             </g>";
+        }
     }
 
     return "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'

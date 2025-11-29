@@ -55,6 +55,7 @@ If the `theme` parameter is specified, any color customizations specified will b
 |          `theme`           |     The theme to apply (Default: `default`)      |                          `dark`, `radical`, etc. [🎨➜](./docs/themes.md)                           |
 |       `hide_border`        |  Make the border transparent (Default: `false`)  |                                         `true` or `false`                                          |
 |      `border_radius`       | Set the roundness of the edges (Default: `4.5`)  |                           Number `0` (sharp corners) to `248` (ellipse)                            |
+|          `grace`           |  Days allowed to miss without breaking streak (Default: `0`)  |                           Number `0` to `7` (e.g., `grace=2`)                            |
 |        `background`        |  Background color (eg. `f2f2f2`, `35,d22,00f`)   | **hex code** without `#`, **css color**, or gradient in the form `angle,start_color,...,end_color` |
 |          `border`          |                   Border color                   |                             **hex code** without `#` or **css color**                              |
 |          `stroke`          |        Stroke line color between sections        |                             **hex code** without `#` or **css color**                              |
