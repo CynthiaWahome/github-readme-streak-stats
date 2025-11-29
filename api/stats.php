@@ -10,9 +10,10 @@ declare(strict_types=1);
 function getGitHubTokens(): array
 {
     $tokens = [];
-    $token = $_SERVER["TOKEN"] ?? "";
+    // Check both $_ENV and $_SERVER for Vercel compatibility
+    $token = $_ENV["TOKEN"] ?? $_SERVER["TOKEN"] ?? getenv("TOKEN") ?: "";
     if (!empty($token)) {
-        $tokens = explode(",", $token);
+        $tokens = array_map('trim', explode(",", $token));
     }
     return $tokens;
 }

@@ -7,14 +7,15 @@ require_once __DIR__ . "/../vendor/autoload.php";
 require_once "stats.php";
 require_once "card.php";
 
-// load .env only if not on Vercel (Vercel provides env vars directly)
-if (!isset($_ENV['VERCEL']) && file_exists(dirname(__DIR__) . "/.env")) {
+// load .env file if it exists (for local development)
+if (file_exists(dirname(__DIR__) . "/.env")) {
     $dotenv = \Dotenv\Dotenv::createImmutable(dirname(__DIR__, 1));
     $dotenv->safeLoad();
 }
 
 // if environment variables are not loaded, display error
-if (!isset($_SERVER["TOKEN"]) && !isset($_ENV["TOKEN"])) {
+$token = $_ENV["TOKEN"] ?? $_SERVER["TOKEN"] ?? getenv("TOKEN") ?: "";
+if (empty($token)) {
     $message = "Missing token in config. Check Contributing.md for details.";
     renderOutput($message, 500);
 }
