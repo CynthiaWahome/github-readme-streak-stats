@@ -170,6 +170,12 @@ function executeContributionGraphRequests(string $user, array $years): array
         curl_multi_remove_handle($multi, $handle);
     }
     curl_multi_close($multi);
+    
+    // Check if we got any valid responses
+    if (empty($responses)) {
+        throw new InvalidArgumentException("Failed to fetch contribution data. Please check that the username is correct and not an organization, and that the GitHub API is accessible.", 500);
+    }
+    
     return $responses;
 }
 
