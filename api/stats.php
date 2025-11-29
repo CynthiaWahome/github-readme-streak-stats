@@ -132,26 +132,32 @@ function executeContributionGraphRequests(string $user, array $years): array
         curl_multi_exec($multi, $running);
     } while ($running);
     $responses = [];
+    $maxRetries = count($tokens);
     foreach ($requests as $year => $handle) {
         $contents = curl_multi_getcontent($handle);
         $decoded = is_string($contents) ? json_decode($contents) : null;
+        $retryCount = 0;
+        
         // if the request failed, retry with the next token
-        if (empty($decoded) || !empty($decoded->errors) || curl_getinfo($handle, CURLINFO_HTTP_CODE) >= 400) {
+        while ((empty($decoded) || !empty($decoded->errors) || curl_getinfo($handle, CURLINFO_HTTP_CODE) >= 400) && $retryCount < $maxRetries) {
             // log the error
             $error = !empty($decoded->errors) ? $decoded->errors[0]->message : "Unknown error.";
-            error_log("Request failed for year $year with token ending in " . substr($token, -4) . ": $error");
-            // if there are more tokens, retry the request
-            if (count($tokens) > 1) {
-                // remove the failed token
-                array_shift($tokens);
+            $currentToken = $tokens[$retryCount % count($tokens)];
+            error_log("Request failed for year $year (attempt " . ($retryCount + 1) . "/$maxRetries): $error");
+            
+            $retryCount++;
+            if ($retryCount < $maxRetries) {
                 // get the next token
-                $token = $tokens[0];
+                $nextToken = $tokens[$retryCount % count($tokens)];
                 // rebuild the request with the new token
                 $query = buildContributionGraphQuery($user, $year);
-                $requests[$year] = getGraphQLCurlHandle($query, $token);
+                curl_multi_remove_handle($multi, $requests[$year]);
+                curl_close($requests[$year]);
+                $requests[$year] = getGraphQLCurlHandle($query, $nextToken);
                 // re-add the handle to the multi-handle
                 curl_multi_add_handle($multi, $requests[$year]);
                 // restart the multi-exec
+                $running = null;
                 do {
                     curl_multi_exec($multi, $running);
                 } while ($running);
@@ -160,8 +166,9 @@ function executeContributionGraphRequests(string $user, array $years): array
                 $decoded = is_string($contents) ? json_decode($contents) : null;
             }
         }
+        
         if (empty($decoded) || empty($decoded->data) || !empty($decoded->errors)) {
-            error_log("Failed to decode response for $user's $year contributions.");
+            error_log("Failed to decode response for $user's $year contributions after $retryCount retries.");
             continue;
         }
         $responses[$year] = $decoded;
