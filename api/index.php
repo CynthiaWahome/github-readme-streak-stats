@@ -16,11 +16,9 @@ if (file_exists(dirname(__DIR__) . "/.env")) {
 // if environment variables are not loaded, display error
 $token = $_ENV["TOKEN"] ?? $_SERVER["TOKEN"] ?? getenv("TOKEN") ?: "";
 if (empty($token)) {
-    error_log("TOKEN not found. _ENV: " . (isset($_ENV["TOKEN"]) ? "yes" : "no") . ", _SERVER: " . (isset($_SERVER["TOKEN"]) ? "yes" : "no") . ", getenv: " . (getenv("TOKEN") ? "yes" : "no"));
-    $message = "Missing token in config. Token count: " . count(explode(",", $token)) . " Check Contributing.md for details.";
+    $message = "Missing token in config. Check Contributing.md for details.";
     renderOutput($message, 500);
 }
-error_log("TOKEN loaded successfully. Token count: " . count(array_filter(array_map('trim', explode(",", $token)))));
 
 
 // set cache to refresh once per three horus

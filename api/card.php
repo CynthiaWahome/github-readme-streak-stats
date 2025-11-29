@@ -484,20 +484,14 @@ function generateCard(array $stats, array $params = null): string
 
     // if days are excluded, add a note to the corner
     $excludedDays = "";
-    if (!empty($stats["excludedDays"]) && count($stats["excludedDays"]) > 0) {
-        $offset = $direction === "rtl" ? $cardWidth - 5 : 5;
-        $excludingDaysText = getExcludingDaysText($stats["excludedDays"], $localeTranslations, $localeCode);
-        if (!empty($excludingDaysText)) {
-            $excludedDays = "<g style='isolation: isolate'>
-                <!-- Excluded Days -->
-                <g transform='translate({$offset},187)'>
-                    <text stroke-width='0' text-anchor='right' fill='{$theme["excludeDaysLabel"]}' stroke='none' font-family='&quot;Segoe UI&quot;, Ubuntu, sans-serif' font-weight='400' font-size='10px' font-style='normal' style='opacity: 0; animation: fadein 0.5s linear forwards 0.9s'>
-                        {$excludingDaysText}
-                    </text>
-                </g>
-            </g>";
-        }
-    }
+    // Disabled excluded days display for now
+    // if (!empty($stats["excludedDays"]) && count($stats["excludedDays"]) > 0) {
+    //     $offset = $direction === "rtl" ? $cardWidth - 5 : 5;
+    //     $excludingDaysText = getExcludingDaysText($stats["excludedDays"], $localeTranslations, $localeCode);
+    //     if (!empty($excludingDaysText)) {
+    //         $excludedDays = ...
+    //     }
+    // }
 
     return "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'
                 style='isolation: isolate' viewBox='0 0 {$cardWidth} {$cardHeight}' width='{$cardWidth}px' height='{$cardHeight}px' direction='{$direction}'>
