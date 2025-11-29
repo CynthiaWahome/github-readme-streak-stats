@@ -24,7 +24,7 @@
   },
   "autoload": {
     "classmap": [
-      "src/"
+      "api/"
     ]
   },
   "require": {
