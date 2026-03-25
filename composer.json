@@ -36,6 +36,7 @@
     "phpunit/phpunit": "^11"
   },
   "scripts": {
+    "vercel-build": "echo 'Dependencies already installed'",
     "start": [
       "Composer\\Config::disableProcessTimeout",
       "php -S localhost:8000 -t src"
