@@ -1,1 +1,2 @@
 composer install --no-dev
+api/demo
