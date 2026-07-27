@@ -40,8 +40,10 @@ try {
     $contributionGraphs = getContributionGraphs($user, $startingYear);
     $contributions = getContributionDates($contributionGraphs);
     
-    // Get grace period from request (default: 3, max: 7)
-    $graceDays = isset($_REQUEST["grace"]) ? max(0, min(7, intval($_REQUEST["grace"]))) : 3;
+    // Get grace period from request (default: 7, max: 7). Defaulting to the
+    // max keeps the public-facing URL free of a &grace= param — the value
+    // still lives here in code, not visibly tuned in a shared/public link.
+    $graceDays = isset($_REQUEST["grace"]) ? max(0, min(7, intval($_REQUEST["grace"]))) : 7;
 
     if (isset($_GET["mode"]) && $_GET["mode"] === "weekly") {
         $stats = getWeeklyContributionStats($contributions);
