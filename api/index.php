@@ -57,14 +57,21 @@ try {
             "User-Agent: GitHub-Readme-Streak-Stats-Debug",
         ]);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["query" => "query { viewer { login } }"]));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["query" => "query { viewer { login organizations(first: 100) { nodes { login } } } }"]));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $viewerResponse = json_decode(curl_exec($ch) ?: "null");
         curl_close($ch);
 
+        $visibleOrgs = array_map(
+            fn($node) => $node->login,
+            $viewerResponse->data->viewer->organizations->nodes ?? [],
+        );
+
         echo json_encode([
             "token_belongs_to" => $viewerResponse->data->viewer->login ?? ($viewerResponse->errors[0]->message ?? "unknown"),
             "querying_for_user" => $user,
+            "organizations_this_token_can_see" => $visibleOrgs,
+            "organizations_this_token_can_see_count" => count($visibleOrgs),
             "years_fetched" => array_keys($contributionGraphs),
             "total_merged_days" => count($contributions),
             "merged_first_date" => array_key_first($contributions),
