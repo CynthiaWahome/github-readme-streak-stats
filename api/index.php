@@ -51,11 +51,7 @@ try {
             "merged_first_date" => array_key_first($contributions),
             "merged_last_date" => array_key_last($contributions),
             "zero_count_days" => count(array_filter($contributions, fn($c) => $c === 0)),
-            "sample_dec_2025_jan_2026" => array_filter(
-                $contributions,
-                fn($date) => $date >= "2025-12-25" && $date <= "2026-01-10",
-                ARRAY_FILTER_USE_KEY,
-            ),
+            "all_zero_dates" => array_keys(array_filter($contributions, fn($c) => $c === 0)),
         ], JSON_PRETTY_PRINT);
         exit();
     }
