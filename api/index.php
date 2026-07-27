@@ -45,7 +45,26 @@ try {
     // it's never active unless explicitly enabled in Vercel's env vars.
     if (getenv("DEBUG_CONTRIBUTIONS") && isset($_GET["debug"])) {
         header("Content-Type: application/json");
+
+        // Identify exactly which GitHub account TOKEN actually authenticates
+        // as. If the deployed token doesn't belong to $user, GitHub silently
+        // returns only $user's PUBLIC contributions to it, not an error —
+        // which would explain private-repo activity looking like gaps.
+        $ch = curl_init("https://api.github.com/graphql");
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Authorization: bearer " . $token,
+            "Content-Type: application/json",
+            "User-Agent: GitHub-Readme-Streak-Stats-Debug",
+        ]);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["query" => "query { viewer { login } }"]));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $viewerResponse = json_decode(curl_exec($ch) ?: "null");
+        curl_close($ch);
+
         echo json_encode([
+            "token_belongs_to" => $viewerResponse->data->viewer->login ?? ($viewerResponse->errors[0]->message ?? "unknown"),
+            "querying_for_user" => $user,
             "years_fetched" => array_keys($contributionGraphs),
             "total_merged_days" => count($contributions),
             "merged_first_date" => array_key_first($contributions),
