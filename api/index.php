@@ -39,7 +39,27 @@ try {
     $startingYear = isset($_REQUEST["starting_year"]) ? intval($_REQUEST["starting_year"]) : null;
     $contributionGraphs = getContributionGraphs($user, $startingYear);
     $contributions = getContributionDates($contributionGraphs);
-    
+
+    // TEMPORARY DIAGNOSTIC ENDPOINT — remove once the Jan 2026 streak
+    // truncation mystery is resolved. Gated behind DEBUG_CONTRIBUTIONS so
+    // it's never active unless explicitly enabled in Vercel's env vars.
+    if (getenv("DEBUG_CONTRIBUTIONS") && isset($_GET["debug"])) {
+        header("Content-Type: application/json");
+        echo json_encode([
+            "years_fetched" => array_keys($contributionGraphs),
+            "total_merged_days" => count($contributions),
+            "merged_first_date" => array_key_first($contributions),
+            "merged_last_date" => array_key_last($contributions),
+            "zero_count_days" => count(array_filter($contributions, fn($c) => $c === 0)),
+            "sample_dec_2025_jan_2026" => array_filter(
+                $contributions,
+                fn($date) => $date >= "2025-12-25" && $date <= "2026-01-10",
+                ARRAY_FILTER_USE_KEY,
+            ),
+        ], JSON_PRETTY_PRINT);
+        exit();
+    }
+
     // Get grace period from request (default: 7, max: 7). Defaulting to the
     // max keeps the public-facing URL free of a &grace= param — the value
     // still lives here in code, not visibly tuned in a shared/public link.

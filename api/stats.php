@@ -171,6 +171,33 @@ function executeContributionGraphRequests(string $user, array $years): array
             error_log("Failed to decode response for $user's $year contributions after $retryCount retries.");
             continue;
         }
+
+        // TEMPORARY DIAGNOSTIC LOGGING — remove once the Jan 2026 streak
+        // truncation mystery is resolved. Logs what this specific request
+        // for $year actually got back, so we can compare against a direct
+        // gh api pull for the same user/year.
+        if (getenv("DEBUG_CONTRIBUTIONS")) {
+            $weeks = $decoded->data->user->contributionsCollection->contributionCalendar->weeks ?? [];
+            $allDays = [];
+            foreach ($weeks as $week) {
+                foreach ($week->contributionDays as $day) {
+                    $allDays[] = $day;
+                }
+            }
+            $totalCount = array_sum(array_map(fn($d) => $d->contributionCount, $allDays));
+            $zeroDays = count(array_filter($allDays, fn($d) => $d->contributionCount === 0));
+            error_log(sprintf(
+                "[DEBUG_CONTRIBUTIONS] year=%d days_returned=%d total_contributions=%d zero_days=%d first_date=%s last_date=%s contributionYears=%s",
+                $year,
+                count($allDays),
+                $totalCount,
+                $zeroDays,
+                $allDays[0]->date ?? "none",
+                end($allDays)->date ?? "none",
+                json_encode($decoded->data->user->contributionsCollection->contributionYears ?? []),
+            ));
+        }
+
         $responses[$year] = $decoded;
     }
     foreach ($requests as $request) {
