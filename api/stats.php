@@ -351,7 +351,7 @@ function getContributionStats(array $contributions, array $excludedDays = [], in
         // reset streak but give exception for today and grace period
         elseif ($date != $today) {
             $missedDays++;
-            
+
             // Only reset if we've exceeded grace days
             if ($missedDays > $graceDays) {
                 // reset streak
@@ -359,6 +359,15 @@ function getContributionStats(array $contributions, array $excludedDays = [], in
                 $stats["currentStreak"]["start"] = $today;
                 $stats["currentStreak"]["end"] = $today;
                 $missedDays = 0;
+            } elseif ($stats["currentStreak"]["length"] > 0) {
+                // Within grace period: forgiven, not absent. A grace
+                // period means this missed day doesn't break the streak --
+                // it should still count toward the elapsed length, same as
+                // a Duolingo-style streak freeze, otherwise the displayed
+                // number silently undercounts every gap it tolerated
+                // instead of showing calendar days since the streak began.
+                ++$stats["currentStreak"]["length"];
+                $stats["currentStreak"]["end"] = $date;
             }
         }
     }
